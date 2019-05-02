@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-# Exceptions are to be handled by caller.
+# Exceptions are to be handled by caller. #TODO: YAGNI IOErrorCallback
 
 import os, json
 from collections import OrderedDict
 from Fun import mkdirs
-import Defaults as DEFAULT
 from Global import die, log
-from KeyStrings import LOG, DAT, CACHE
+from KeyStrings import DAT, CACHE, LOG
 
 def env( var ):
     val = os.getenv( var );
@@ -27,8 +26,16 @@ CACHE_DIRECTORY_XDG_DEF = os.path.join( ENV_HOME, '.cache' )
 # Windows Compatibility #
 CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'    #Except XP
 
+class ConfigurationDefaults(  ):
+#NOTE: Dynamically Included Default Configuration Parameters: { DAT, CACHE, LOG, } TODO: 'REV'?
+    def __init__( self, config_filename, config_params, log_filename = None ):
+        self.CONFIGURATION_FILENAME = config_filename
+        self.CONFIGURATION_PARAMETERS = config_params
+        self.LOG_FILENAME = log_filename;
+
+
 class Configure(  ):
-    def __init__( self, name, config_file = None, IOErrorCallback = die ):
+    def __init__( self, name, DEFAULT, config_file = None, IOErrorCallback = die ):
         # Application is responsible for just in time creation of DAT and CACHE directories
         if( config_file == None ):
             config_file = env( CONFIGURATION_DIRECTORY_XDG )
@@ -36,7 +43,7 @@ class Configure(  ):
             if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
             if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
             config_file = os.path.join( config_file, DEFAULT.CONFIGURATION_FILENAME )
-        self.dirty = self.load( config_file )
+        self.dirty = self.load( config_file, DEFAULT.CONFIGURATION_PARAMETERS )
         self.APP_NAME = name
         if( DAT not in self.param ):
             self.param[DAT] = env( DATA_DIRECTORY_XDG )
@@ -44,8 +51,10 @@ class Configure(  ):
             if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
             self.param[DAT] = os.path.join( self.param[DAT], self.APP_NAME )
             self.dirty = True
-        if( LOG not in self.param ): #TODO: Use HOME/.filename or CONFIG_DIR/filename by default ?
-            self.param[LOG] = os.path.join( self.param[DAT], DEFAULT.LOG_FILENAME )
+        if( LOG not in self.param ):
+            if DEFAULT.LOG_FILENAME: self.param[LOG] = DEFAULT.LOG_FILENAME;
+            else: self.param[LOG] = self.APP_NAME + ".log";
+            self.param[LOG] = os.path.join( self.param[DAT], self.param[LOG] )#TODO: Use HOME/.filename by default ?
             self.dirty = True
         if( CACHE not in self.param ):
             self.param[CACHE] = env( CACHE_DIRECTORY_XDG )
@@ -65,7 +74,7 @@ class Configure(  ):
             fh.close(  )
             self.dirty = False
         except IOError as e: IOErrorCallback( e );
-    def load( self, config_file, param = DEFAULT.CONFIGURATION_PARAMETERS ): # Returns true if needs (re)write.
+    def load( self, config_file, param ): # Returns true if needs (re)write.
         self.config_file = config_file
         try:
             fh = open( config_file )
@@ -80,5 +89,6 @@ class Configure(  ):
 
 
 if __name__ == '__main__':
-    config = Configure(  )
+    default_params = { "Testing" : "123" }
+    config = Configure( "YmirConfigureTest", ConfigurationDefaults( "Delete.me", default_params ) )
     print config.param
