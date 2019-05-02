@@ -5,7 +5,7 @@
 import os, json
 from Fun import env, mkdirs
 import Defaults as DEFAULT
-from Defaults import APP_NAME, DAT #TODO: Transfer into Main module
+from Defaults import DAT
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
@@ -24,7 +24,7 @@ class Configure(  ):
 			config_file = env( CONFIGURATION_DIRECTORY_XDG )
 			if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
 			if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
-			config_file += '/' + APP_NAME + '/'
+			config_file += DEFAULT.CONFIGURATION_DIRECTORY_NAME
 			if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
 			config_file += DEFAULT.CONFIGURATION_FILENAME
 		self.dirty = self.load( config_file )
