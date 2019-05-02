@@ -5,7 +5,7 @@
 import os, json
 from Fun import env, mkdirs
 import Defaults as DEFAULT
-from Defaults import APP_NAME, DATA_DIR #TODO: Transfer into Main module
+from Defaults import APP_NAME, DAT #TODO: Transfer into Main module
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
@@ -19,7 +19,7 @@ CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'	#Except XP
 
 class Configure(  ):
 	def __init__( self, config_file = None ):
-		#Application is responsible for creation of DATA_DIR
+		#Application is responsible for creation of DAT directory
 		if( config_file == None ):
 			config_file = env( CONFIGURATION_DIRECTORY_XDG )
 			if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
@@ -28,11 +28,11 @@ class Configure(  ):
 			if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
 			config_file += DEFAULT.CONFIGURATION_FILENAME
 		self.dirty = self.load( config_file )
-		if( DATA_DIR not in self.param ):
-			self.param[DATA_DIR] = env( DATA_DIRECTORY_XDG );
-			if( self.param[DATA_DIR] == '' ): self.param[DATA_DIR] = env( CONFIGURATION_DIRECTORY_WIN );
-			if( self.param[DATA_DIR] == '' ): self.param[DATA_DIR] = DATA_DIRECTORY_XDG_DEF;
-			self.param[DATA_DIR] += DEFAULT.DATA_DIRECTORY_NAME
+		if( DAT not in self.param ):
+			self.param[DAT] = env( DATA_DIRECTORY_XDG );
+			if( self.param[DAT] == '' ): self.param[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
+			if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
+			self.param[DAT] += DEFAULT.DATA_DIRECTORY_NAME
 			self.dirty = True
 		for key in DEFAULT.CONFIGURATION_PARAMETERS:
 			if( key not in self.param ):
