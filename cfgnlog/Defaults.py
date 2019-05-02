@@ -10,6 +10,6 @@ LOG_FILENAME = 'ymirsystem.log'
 
 
 CONFIGURATION_PARAMETERS = {
-	'V' : VERSION
+    'V' : VERSION
 }
 #NOTE: Dynamically Included Default Configuration Parameters: { DAT, CACHE } TODO: LOG, 'REV'?
