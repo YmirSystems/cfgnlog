@@ -3,7 +3,7 @@
 # Exceptions are to be handled by caller.
 
 import os, json
-from Fun import env, mkdirs
+from Fun import env, mkdirs, die
 import Defaults as DEFAULT
 from Defaults import DAT
 
