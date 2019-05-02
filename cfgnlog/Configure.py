@@ -31,12 +31,19 @@ CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'    #Except XP
 DEFAULT_CONFIG_FILE_EXT = '.cfg'
 
 class Configure(  ):
-    def __init__( self, app_name, default_configuration_filename = None, config_file = None ):
+    def __init__( self, app_name, default_configuration_filename = None, config_file = None, is_partial = False ):
+        '''
+        app_name - The name of the application is used for keeping your app files separate from other apps.
+        default_configuration_filename - This will override the default of "app_name.cfg".
+        config_file - Use this if the full path to the configuration file is known or given by the user.
+        is_partial - If more than one config file will be used for an application, this will create a directory for them called app_name.
+        '''
         self.APP_NAME = app_name
         if( config_file == None ):
             config_file = env( CONFIGURATION_DIRECTORY_XDG )
             if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
             if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
+            if( is_partial ): config_file = os.path.join( config_file, self.APP_NAME );
             if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
             if default_configuration_filename: config_file = os.path.join( config_file, default_configuration_filename );
             else: config_file = os.path.join( config_file, self.APP_NAME + DEFAULT_CONFIG_FILE_EXT );
