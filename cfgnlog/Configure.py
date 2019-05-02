@@ -76,7 +76,7 @@ class Configure(  ):
             self.param = param
             log.append( 'Creating configuration file: ' + config_file )
             return True
-        #TODO: except ValueError: malformed configuration file
+        #TODO: except ValueError: malformed configuration file to be handled by caller.
 
 
 if __name__ == '__main__':
