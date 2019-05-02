@@ -1,11 +1,13 @@
 #!/usr/bin/python
 
-# Exceptions are to be handled by caller. #TODO: YAGNI IOErrorCallback
+# Exceptions are to be handled by caller:
+#   IOError     - Unable to update file
+#   ValueError  - Malformed configuration file
 
 import os, json
 from collections import OrderedDict
 from Fun import mkdirs
-from Global import die, log
+from Global import log
 from KeyStrings import DAT, CACHE, LOG
 
 def env( var ):
@@ -35,7 +37,7 @@ class ConfigurationDefaults(  ):
 
 
 class Configure(  ):
-    def __init__( self, name, DEFAULT, config_file = None, IOErrorCallback = die ):
+    def __init__( self, name, DEFAULT, config_file = None ):
         # Application is responsible for just in time creation of DAT and CACHE directories
         if( config_file == None ):
             config_file = env( CONFIGURATION_DIRECTORY_XDG )
@@ -66,14 +68,12 @@ class Configure(  ):
             if( key not in self.param ):
                 self.param[key] = DEFAULT.CONFIGURATION_PARAMETERS[key]
                 self.dirty = True
-        if( self.dirty ): self.update( IOErrorCallback );
-    def update( self, IOErrorCallback = die ):
-        try:
-            fh = open( self.config_file, 'w', DEFAULT_MODE )
-            fh.write( json.dumps( self.param, indent=4, separators=(',', ': ') ) ) #TODO: Only write necessary parts
-            fh.close(  )
-            self.dirty = False
-        except IOError as e: IOErrorCallback( e );
+        if( self.dirty ): self.update(  );
+    def update( self ):
+        fh = open( self.config_file, 'w', DEFAULT_MODE )
+        fh.write( json.dumps( self.param, indent=4, separators=(',', ': ') ) ) #TODO: Only write necessary parts
+        fh.close(  )
+        self.dirty = False
     def load( self, config_file, param ): # Returns true if needs (re)write.
         self.config_file = config_file
         try:
@@ -85,7 +85,11 @@ class Configure(  ):
             self.param = param
             log.append( 'Creating configuration file: ' + config_file )
             return True
-        #TODO: except ValueError: malformed configuration file to be handled by caller.
+        except ValueError as MalformedFileError:
+            MalformedFileError.strerror = "Malformed configuration file"
+            MalformedFileError.filename = self.config_file
+            MalformedFileError.errno = 1
+            raise MalformedFileError
 
 
 if __name__ == '__main__':
