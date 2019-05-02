@@ -6,7 +6,6 @@ import os, json
 from collections import OrderedDict
 from Fun import mkdirs
 import Defaults as DEFAULT
-from Defaults import APP_NAME
 from Global import die, log
 from KeyStrings import LOG, DAT, CACHE
 
@@ -29,7 +28,7 @@ CACHE_DIRECTORY_XDG_DEF = os.path.join( ENV_HOME, '.cache' )
 CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'    #Except XP
 
 class Configure(  ):
-    def __init__( self, config_file = None, IOErrorCallback = die ):
+    def __init__( self, name, config_file = None, IOErrorCallback = die ):
         # Application is responsible for just in time creation of DAT and CACHE directories
         if( config_file == None ):
             config_file = env( CONFIGURATION_DIRECTORY_XDG )
@@ -38,11 +37,12 @@ class Configure(  ):
             if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
             config_file = os.path.join( config_file, DEFAULT.CONFIGURATION_FILENAME )
         self.dirty = self.load( config_file )
+        self.APP_NAME = name
         if( DAT not in self.param ):
             self.param[DAT] = env( DATA_DIRECTORY_XDG )
             if( self.param[DAT] == '' ): self.param[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
             if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
-            self.param[DAT] = os.path.join( self.param[DAT], APP_NAME )
+            self.param[DAT] = os.path.join( self.param[DAT], self.APP_NAME )
             self.dirty = True
         if( LOG not in self.param ): #TODO: Use HOME/.filename or CONFIG_DIR/filename by default ?
             self.param[LOG] = os.path.join( self.param[DAT], DEFAULT.LOG_FILENAME )
@@ -50,8 +50,8 @@ class Configure(  ):
         if( CACHE not in self.param ):
             self.param[CACHE] = env( CACHE_DIRECTORY_XDG )
             if( self.param[CACHE] == '' ): self.param[CACHE] = env( CONFIGURATION_DIRECTORY_WIN );
-            if( self.param[CACHE] == '' ): self.param[CACHE] = os.path.join( CACHE_DIRECTORY_XDG_DEF, APP_NAME );
-            else: self.param[CACHE] = os.path.join( self.param[CACHE], APP_NAME, 'cache' ); #WINDOWS
+            if( self.param[CACHE] == '' ): self.param[CACHE] = os.path.join( CACHE_DIRECTORY_XDG_DEF, self.APP_NAME );
+            else: self.param[CACHE] = os.path.join( self.param[CACHE], self.APP_NAME, 'cache' ); #WINDOWS
             self.dirty = True
         for key in DEFAULT.CONFIGURATION_PARAMETERS:
             if( key not in self.param ):

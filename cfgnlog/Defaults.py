@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-
-APP_NAME = 'Ymir'
-
 VERSION = [0,0,0] #TODO: Begin incrementing once backwards compabibility is needed.
 
 CONFIGURATION_FILENAME = 'ymir.cfg'
