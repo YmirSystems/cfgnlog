@@ -35,8 +35,7 @@ class Configure(  ):
             config_file = env( CONFIGURATION_DIRECTORY_XDG )
             if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
             if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
-            config_file = os.path.join( config_file, APP_NAME )
-            if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' ); #TODO: If nothing else to be in dir don't make one
+            if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
             config_file = os.path.join( config_file, DEFAULT.CONFIGURATION_FILENAME )
         self.dirty = self.load( config_file )
         if( DAT not in self.param ):
