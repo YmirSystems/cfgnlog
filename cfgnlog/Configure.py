@@ -5,7 +5,7 @@
 import os, json
 from sys import exit
 
-from ConfigurationParameters import APP_NAME, DEFAULT_CONFIGURATION_FILENAME, DEFAULT_DATA_DIRECTORY_NAME, DATA_DIR_KEY, DEFAULT_CONFIGURATION_PARAMETERS
+from ConfigurationParameters import APP_NAME, DEFAULT_CONFIGURATION_FILENAME, DEFAULT_DATA_DIRECTORY_NAME, DATA_DIR, DEFAULT_CONFIGURATION_PARAMETERS
 
 #TODO: Move these into a separate module
 def die( e ): print( 'ERROR: ' + e.strerror ); exit( e.errno );
@@ -16,9 +16,7 @@ def env( var ):
 def mkdirs( path, mode, barf = None ):
 	if( barf != None ): print( barf + ': ' + path );
 	os.makedirs( path, mode );
-	#except OSError as e: die( e );
-#TODO: Ask user to select a directory (in Caller).
-#      Add mesage dilivery callback to Configuration, default to print.
+#TODO: Add mesage dilivery callback to Configuration, default to print. Use to pass to a logfile.
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
@@ -41,11 +39,11 @@ class Configure(  ):
 			if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
 			config_file += DEFAULT_CONFIGURATION_FILENAME
 		self.dirty = self.load( config_file )
-		if( DATA_DIR_KEY not in self.param ):
-			self.param[DATA_DIR_KEY] = env( DATA_DIRECTORY_XDG );
-			if( self.param[DATA_DIR_KEY] == '' ): self.param[DATA_DIR_KEY] = env( CONFIGURATION_DIRECTORY_WIN );
-			if( self.param[DATA_DIR_KEY] == '' ): self.param[DATA_DIR_KEY] = DATA_DIRECTORY_XDG_DEF;
-			self.param[DATA_DIR_KEY] += DEFAULT_DATA_DIRECTORY_NAME
+		if( DATA_DIR not in self.param ):
+			self.param[DATA_DIR] = env( DATA_DIRECTORY_XDG );
+			if( self.param[DATA_DIR] == '' ): self.param[DATA_DIR] = env( CONFIGURATION_DIRECTORY_WIN );
+			if( self.param[DATA_DIR] == '' ): self.param[DATA_DIR] = DATA_DIRECTORY_XDG_DEF;
+			self.param[DATA_DIR] += DEFAULT_DATA_DIRECTORY_NAME
 			self.dirty = True
 		for key in DEFAULT_CONFIGURATION_PARAMETERS:
 			if( key not in self.param ):
@@ -59,7 +57,7 @@ class Configure(  ):
 			fh.write( json.dumps( self.param ) ) #TODO: Only write necessary parts
 			fh.close(  )
 			self.dirty = False
-		except IOError as e: die( e ); #TODO: Ask user to select a file.
+		except IOError as e: die( e ); #TODO: Ask user to select a file. Delegate up.
 	def load( self, config_file ): # Returns true if needs (re)write.
 		try:
 			fh = open( config_file )
