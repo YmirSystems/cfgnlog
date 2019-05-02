@@ -28,71 +28,76 @@ CACHE_DIRECTORY_XDG_DEF = os.path.join( ENV_HOME, '.cache' )
 # Windows Compatibility #
 CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'    #Except XP
 
-class ConfigurationDefaults(  ):
-#NOTE: Dynamically Included Default Configuration Parameters: { DAT, CACHE, LOG, } TODO: 'REV'?
-    def __init__( self, config_filename, config_params, log_filename = None ):
-        self.CONFIGURATION_FILENAME = config_filename
-        self.CONFIGURATION_PARAMETERS = config_params
-        self.LOG_FILENAME = log_filename;
-
+DEFAULT_CONFIGURATION_FILENAME_EXT = '.cfg'
 
 class Configure(  ):
-    def __init__( self, name, DEFAULT, config_file = None ):
-        # Application is responsible for just in time creation of DAT and CACHE directories
+    def __init__( self, name, DEFAULT_CONFIGURATION_FILENAME = None, config_file = None ):
         if( config_file == None ):
             config_file = env( CONFIGURATION_DIRECTORY_XDG )
             if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
             if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
             if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
-            config_file = os.path.join( config_file, DEFAULT.CONFIGURATION_FILENAME )
-        self.dirty = self.load( config_file, DEFAULT.CONFIGURATION_PARAMETERS )
+            if DEFAULT_CONFIGURATION_FILENAME: self.config_file = os.path.join( config_file, DEFAULT_CONFIGURATION_FILENAME );
+            else: self.config_file = os.path.join( config_file, name + DEFAULT_CONFIGURATION_FILENAME_EXT );
+        else: self.config_file = config_file;
+        self.dirty = False
         self.APP_NAME = name
+    def add_dat( self ):
+        ''' Add a data directory parameter to the loaded configuration. The application is responsible for creating it. '''
         if( DAT not in self.param ):
             self.param[DAT] = env( DATA_DIRECTORY_XDG )
             if( self.param[DAT] == '' ): self.param[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
             if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
             self.param[DAT] = os.path.join( self.param[DAT], self.APP_NAME )
             self.dirty = True
+    def add_log( self, DEFAULT_LOG_FILENAME = None, default_use_home = False ):
+        ''' Add a log directory parameter to the loaded configuration. The application is responsible for creating it. '''
         if( LOG not in self.param ):
-            if DEFAULT.LOG_FILENAME: self.param[LOG] = DEFAULT.LOG_FILENAME;
+            if DEFAULT_LOG_FILENAME: self.param[LOG] = DEFAULT_LOG_FILENAME;
             else: self.param[LOG] = self.APP_NAME + ".log";
-            self.param[LOG] = os.path.join( self.param[DAT], self.param[LOG] )#TODO: Use HOME/.filename by default ?
+            if default_use_home:
+                self.param[LOG] = os.path.join( ENV_HOME, '.'+self.param[LOG] );
+            else: self.param[LOG] = os.path.join( self.param[DAT], self.param[LOG] );
             self.dirty = True
+    def add_cache( self ):
+        ''' Add a cache directory parameter to the loaded configuration. The application is responsible for creating it. '''
         if( CACHE not in self.param ):
             self.param[CACHE] = env( CACHE_DIRECTORY_XDG )
             if( self.param[CACHE] == '' ): self.param[CACHE] = env( CONFIGURATION_DIRECTORY_WIN );
             if( self.param[CACHE] == '' ): self.param[CACHE] = os.path.join( CACHE_DIRECTORY_XDG_DEF, self.APP_NAME );
             else: self.param[CACHE] = os.path.join( self.param[CACHE], self.APP_NAME, 'cache' ); #WINDOWS
             self.dirty = True
-        for key in DEFAULT.CONFIGURATION_PARAMETERS:
-            if( key not in self.param ):
-                self.param[key] = DEFAULT.CONFIGURATION_PARAMETERS[key]
-                self.dirty = True
-        if( self.dirty ): self.update(  );
     def update( self ):
         fh = open( self.config_file, 'w', DEFAULT_MODE )
         fh.write( json.dumps( self.param, indent=4, separators=(',', ': ') ) ) #TODO: Only write necessary parts
         fh.close(  )
         self.dirty = False
-    def load( self, config_file, param ): # Returns true if needs (re)write.
-        self.config_file = config_file
+    def load( self, DEFAULT_CONFIGURATION_PARAMETERS ): # Returns true if needs (re)write.
         try:
-            fh = open( config_file )
+            fh = open( self.config_file )
             self.param = json.loads( fh.read(  ), object_pairs_hook=OrderedDict )
             fh.close(  )
-            return False
+            for key in DEFAULT_CONFIGURATION_PARAMETERS:
+                if( key not in self.param ):
+                    self.param[key] = DEFAULT_CONFIGURATION_PARAMETERS[key]
+                    self.dirty = True
         except IOError:
-            self.param = param
-            log.append( 'Creating configuration file: ' + config_file )
-            return True
+            self.param = DEFAULT_CONFIGURATION_PARAMETERS
+            self.dirty = True #TODO: YAGNI?
+            log.append( 'Creating configuration file: ' + self.config_file )
         except ValueError as MalformedFileError:
             MalformedFileError.strerror = "Malformed configuration file"
             MalformedFileError.filename = self.config_file
             MalformedFileError.errno = 1
             raise MalformedFileError
+        if( self.dirty ): self.update(  );
 
 
 if __name__ == '__main__':
     default_params = { "Testing" : "123" }
-    config = Configure( "YmirConfigureTest", ConfigurationDefaults( "Delete.me", default_params ) )
+    config = Configure( "ConfigureTest", "delete.me" )
+    config.load( default_params )
+    config.add_dat(  )
+    config.add_cache(  )
+    config.add_log( default_use_home = True )
     print config.param
