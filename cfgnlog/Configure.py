@@ -45,8 +45,8 @@ class Configure(  ):
         self.dirty = False
 
     def add_update( self, key, value ):
-        if not( self.param[key] == value ):
-            self.param[key] = value
+        if not( self.options[key] == value ):
+            self.options[key] = value
             self.dirty = True
         if key in self.actions:
             for trigger in self.actions[key]: trigger( );
@@ -57,49 +57,49 @@ class Configure(  ):
 
     def add_dat( self ):
         ''' Add a data directory parameter to the loaded configuration. The application is responsible for creating it. '''
-        if( DAT not in self.param ):
-            self.param[DAT] = env( DATA_DIRECTORY_XDG )
-            if( self.param[DAT] == '' ): self.param[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
-            if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
-            self.param[DAT] = os.path.join( self.param[DAT], self.APP_NAME )
+        if( DAT not in self.options ):
+            self.options[DAT] = env( DATA_DIRECTORY_XDG )
+            if( self.options[DAT] == '' ): self.options[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
+            if( self.options[DAT] == '' ): self.options[DAT] = DATA_DIRECTORY_XDG_DEF;
+            self.options[DAT] = os.path.join( self.options[DAT], self.APP_NAME )
             self.dirty = True
 
     def add_log( self, default_log_filename = None, default_use_home = False ):
         ''' Add a log directory parameter to the loaded configuration. The application is responsible for creating it. '''
-        if( LOG not in self.param ):
-            if default_log_filename: self.param[LOG] = default_log_filename;
-            else: self.param[LOG] = self.APP_NAME + ".log";
+        if( LOG not in self.options ):
+            if default_log_filename: self.options[LOG] = default_log_filename;
+            else: self.options[LOG] = self.APP_NAME + ".log";
             if default_use_home:
-                self.param[LOG] = os.path.join( ENV_HOME, '.'+self.param[LOG] );
-            else: self.param[LOG] = os.path.join( self.param[DAT], self.param[LOG] );
+                self.options[LOG] = os.path.join( ENV_HOME, '.'+self.options[LOG] );
+            else: self.options[LOG] = os.path.join( self.options[DAT], self.options[LOG] );
             self.dirty = True
 
     def add_cache( self ):
         ''' Add a cache directory parameter to the loaded configuration. The application is responsible for creating it. '''
-        if( CACHE not in self.param ):
-            self.param[CACHE] = env( CACHE_DIRECTORY_XDG )
-            if( self.param[CACHE] == '' ): self.param[CACHE] = env( CONFIGURATION_DIRECTORY_WIN );
-            if( self.param[CACHE] == '' ): self.param[CACHE] = os.path.join( CACHE_DIRECTORY_XDG_DEF, self.APP_NAME );
-            else: self.param[CACHE] = os.path.join( self.param[CACHE], self.APP_NAME, 'cache' ); #WINDOWS
+        if( CACHE not in self.options ):
+            self.options[CACHE] = env( CACHE_DIRECTORY_XDG )
+            if( self.options[CACHE] == '' ): self.options[CACHE] = env( CONFIGURATION_DIRECTORY_WIN );
+            if( self.options[CACHE] == '' ): self.options[CACHE] = os.path.join( CACHE_DIRECTORY_XDG_DEF, self.APP_NAME );
+            else: self.options[CACHE] = os.path.join( self.options[CACHE], self.APP_NAME, 'cache' ); #WINDOWS
             self.dirty = True
 
     def write( self ):
         fh = open( self.config_file, 'w', DEFAULT_MODE )
-        fh.write( json.dumps( self.param, indent=4, separators=(',', ': ') ) )
+        fh.write( json.dumps( self.options, indent=4, separators=(',', ': ') ) )
         fh.close(  )
         self.dirty = False
 
     def load( self, default_configuration_parameters ):
         try:
             fh = open( self.config_file )
-            self.param = json.loads( fh.read(  ), object_pairs_hook=OrderedDict )
+            self.options = json.loads( fh.read(  ), object_pairs_hook=OrderedDict )
             fh.close(  )
             for key in default_configuration_parameters:
-                if( key not in self.param ):
-                    self.param[key] = default_configuration_parameters[key]
+                if( key not in self.options ):
+                    self.options[key] = default_configuration_parameters[key]
                     self.dirty = True
         except IOError:
-            self.param = default_configuration_parameters
+            self.options = default_configuration_parameters
             log.append( 'Creating configuration file: ' + self.config_file )
             self.write(  )
         except ValueError as MalformedFileError:
@@ -116,4 +116,4 @@ if __name__ == '__main__':
     config.add_dat(  )
     config.add_cache(  )
     config.add_log( default_use_home = True )
-    print config.param
+    print config.options
