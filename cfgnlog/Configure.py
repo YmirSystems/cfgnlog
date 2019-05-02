@@ -4,7 +4,7 @@
 
 import os, json
 from Fun import env, mkdirs
-import Defaults as DEFAULT #TODO: remove reduntancy ie: DEFAULT.DEFAULT
+import Defaults as DEFAULT
 from Defaults import APP_NAME, DATA_DIR #TODO: Transfer into Main module
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
@@ -26,17 +26,17 @@ class Configure(  ):
 			if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
 			config_file += '/' + APP_NAME + '/'
 			if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
-			config_file += DEFAULT.DEFAULT_CONFIGURATION_FILENAME
+			config_file += DEFAULT.CONFIGURATION_FILENAME
 		self.dirty = self.load( config_file )
 		if( DATA_DIR not in self.param ):
 			self.param[DATA_DIR] = env( DATA_DIRECTORY_XDG );
 			if( self.param[DATA_DIR] == '' ): self.param[DATA_DIR] = env( CONFIGURATION_DIRECTORY_WIN );
 			if( self.param[DATA_DIR] == '' ): self.param[DATA_DIR] = DATA_DIRECTORY_XDG_DEF;
-			self.param[DATA_DIR] += DEFAULT.DEFAULT_DATA_DIRECTORY_NAME
+			self.param[DATA_DIR] += DEFAULT.DATA_DIRECTORY_NAME
 			self.dirty = True
-		for key in DEFAULT.DEFAULT_CONFIGURATION_PARAMETERS:
+		for key in DEFAULT.CONFIGURATION_PARAMETERS:
 			if( key not in self.param ):
-				self.param[key] = DEFAULT.DEFAULT_CONFIGURATION_PARAMETERS[key]
+				self.param[key] = DEFAULT.CONFIGURATION_PARAMETERS[key]
 				self.dirty = True
 		if( self.dirty ): self.update( config_file );
 		self.f_ref = config_file #XXX
@@ -55,7 +55,7 @@ class Configure(  ):
 			#TODO: verify version and update when needed
 			return False
 		except IOError:
-			self.param = DEFAULT.DEFAULT_CONFIGURATION_PARAMETERS
+			self.param = DEFAULT.CONFIGURATION_PARAMETERS
 			print( 'Creating configuration file: ' + config_file )
 			return True
 		#TODO: except ValueError: malformed configuration file
