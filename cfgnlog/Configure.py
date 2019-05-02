@@ -7,7 +7,6 @@
 import os, json
 from collections import OrderedDict
 from Fun import mkdirs
-from Global import log
 
 def env( var ):
     val = os.getenv( var );
@@ -95,7 +94,7 @@ class Configure(  ):
         fh.close(  )
         self.dirty = False
 
-    def load( self, default_configuration_parameters ):
+    def load( self, default_configuration_parameters, log = None ):
         try:
             fh = open( self.config_file )
             self.options = json.loads( fh.read(  ), object_pairs_hook=OrderedDict )
@@ -106,7 +105,7 @@ class Configure(  ):
                     self.dirty = True
         except IOError:
             self.options = default_configuration_parameters
-            log.append( 'Creating configuration file: ' + self.config_file )
+            if log: log.append( 'Creating configuration file: ' + self.config_file );
             self.write(  )
         except ValueError as MalformedFileError:
             MalformedFileError.strerror = "Malformed configuration file"
