@@ -4,11 +4,16 @@
 
 import os, json
 from collections import OrderedDict
-from Fun import env, mkdirs, die
+from Fun import mkdirs
 import Defaults as DEFAULT
 from Defaults import APP_NAME
-from Global import log
+from Global import die, log
 from KeyStrings import LOG, DAT, CACHE
+
+def env( var ):
+    val = os.getenv( var );
+    if( val == None ): return '';
+    return val
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
