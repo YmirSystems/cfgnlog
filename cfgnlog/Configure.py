@@ -5,7 +5,9 @@
 import os, json
 from Fun import env, mkdirs, die
 import Defaults as DEFAULT
-from Defaults import APP_NAME, DAT, CACHE
+from Defaults import APP_NAME
+from Global import log
+from KeyStrings import LOG, DAT, CACHE
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
@@ -16,8 +18,6 @@ DATA_DIRECTORY_XDG = 'XDG_DATA_HOME'
 DATA_DIRECTORY_XDG_DEF =  os.path.join( ENV_HOME,  '.local', 'share' )
 CACHE_DIRECTORY_XDG = 'XDG_CACHE_HOME'
 CACHE_DIRECTORY_XDG_DEF = os.path.join( ENV_HOME, '.cache' )
-
-# LOG_FILENAME = APP_NAME + '.log' #TODO
 
 # Windows Compatibility #
 CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'	#Except XP
@@ -30,7 +30,7 @@ class Configure(  ):
 			if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
 			if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
 			config_file = os.path.join( config_file, APP_NAME )
-			if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
+			if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' ); #TODO: If nothing else to be in dir don't make one
 			config_file = os.path.join( config_file, DEFAULT.CONFIGURATION_FILENAME )
 		self.dirty = self.load( config_file )
 		if( DAT not in self.param ):
@@ -38,6 +38,9 @@ class Configure(  ):
 			if( self.param[DAT] == '' ): self.param[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
 			if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
 			self.param[DAT] = os.path.join( self.param[DAT], APP_NAME )
+			self.dirty = True
+		if( LOG not in self.param ): #TODO: Use HOME/.filename or CONFIG_DIR/filename by default ?
+			self.param[LOG] = os.path.join( self.param[DAT], DEFAULT.LOG_FILENAME )
 			self.dirty = True
 		if( CACHE not in self.param ):
 			self.param[CACHE] = env( CACHE_DIRECTORY_XDG )
@@ -66,7 +69,7 @@ class Configure(  ):
 			return False
 		except IOError:
 			self.param = param
-			print( 'Creating configuration file: ' + config_file )
+			log.append( 'Creating configuration file: ' + config_file )
 			return True
 		#TODO: except ValueError: malformed configuration file
 
