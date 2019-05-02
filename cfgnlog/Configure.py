@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Exceptions are to be handled by caller:
-#   IOError     - Unable to update file
+#   IOError     - Unable to write to file
 #   ValueError  - Malformed configuration file
 
 import os, json
@@ -28,20 +28,26 @@ CACHE_DIRECTORY_XDG_DEF = os.path.join( ENV_HOME, '.cache' )
 # Windows Compatibility #
 CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'    #Except XP
 
-DEFAULT_CONFIGURATION_FILENAME_EXT = '.cfg'
+DEFAULT_CONFIG_FILE_EXT = '.cfg'
 
 class Configure(  ):
-    def __init__( self, name, DEFAULT_CONFIGURATION_FILENAME = None, config_file = None ):
+    def __init__( self, app_name, default_configuration_filename = None, config_file = None ):
+        self.APP_NAME = app_name
         if( config_file == None ):
             config_file = env( CONFIGURATION_DIRECTORY_XDG )
             if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
             if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
             if not os.path.exists( config_file ): mkdirs( config_file, DEFAULT_MODE, 'Creating configuration directory' );
-            if DEFAULT_CONFIGURATION_FILENAME: self.config_file = os.path.join( config_file, DEFAULT_CONFIGURATION_FILENAME );
-            else: self.config_file = os.path.join( config_file, name + DEFAULT_CONFIGURATION_FILENAME_EXT );
-        else: self.config_file = config_file;
+            if default_configuration_filename: config_file = os.path.join( config_file, default_configuration_filename );
+            else: config_file = os.path.join( config_file, self.APP_NAME + DEFAULT_CONFIG_FILE_EXT );
+        self.config_file = config_file;
         self.dirty = False
-        self.APP_NAME = name
+
+    def add_update( self, key, value ):
+        if not( self.param[key] == value ):
+            self.param[key] = value
+            self.dirty = True
+
     def add_dat( self ):
         ''' Add a data directory parameter to the loaded configuration. The application is responsible for creating it. '''
         if( DAT not in self.param ):
@@ -50,15 +56,17 @@ class Configure(  ):
             if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
             self.param[DAT] = os.path.join( self.param[DAT], self.APP_NAME )
             self.dirty = True
-    def add_log( self, DEFAULT_LOG_FILENAME = None, default_use_home = False ):
+
+    def add_log( self, default_log_filename = None, default_use_home = False ):
         ''' Add a log directory parameter to the loaded configuration. The application is responsible for creating it. '''
         if( LOG not in self.param ):
-            if DEFAULT_LOG_FILENAME: self.param[LOG] = DEFAULT_LOG_FILENAME;
+            if default_log_filename: self.param[LOG] = default_log_filename;
             else: self.param[LOG] = self.APP_NAME + ".log";
             if default_use_home:
                 self.param[LOG] = os.path.join( ENV_HOME, '.'+self.param[LOG] );
             else: self.param[LOG] = os.path.join( self.param[DAT], self.param[LOG] );
             self.dirty = True
+
     def add_cache( self ):
         ''' Add a cache directory parameter to the loaded configuration. The application is responsible for creating it. '''
         if( CACHE not in self.param ):
@@ -67,30 +75,31 @@ class Configure(  ):
             if( self.param[CACHE] == '' ): self.param[CACHE] = os.path.join( CACHE_DIRECTORY_XDG_DEF, self.APP_NAME );
             else: self.param[CACHE] = os.path.join( self.param[CACHE], self.APP_NAME, 'cache' ); #WINDOWS
             self.dirty = True
-    def update( self ):
+
+    def write( self ):
         fh = open( self.config_file, 'w', DEFAULT_MODE )
-        fh.write( json.dumps( self.param, indent=4, separators=(',', ': ') ) ) #TODO: Only write necessary parts
+        fh.write( json.dumps( self.param, indent=4, separators=(',', ': ') ) )
         fh.close(  )
         self.dirty = False
-    def load( self, DEFAULT_CONFIGURATION_PARAMETERS ): # Returns true if needs (re)write.
+
+    def load( self, default_configuration_parameters ):
         try:
             fh = open( self.config_file )
             self.param = json.loads( fh.read(  ), object_pairs_hook=OrderedDict )
             fh.close(  )
-            for key in DEFAULT_CONFIGURATION_PARAMETERS:
+            for key in default_configuration_parameters:
                 if( key not in self.param ):
-                    self.param[key] = DEFAULT_CONFIGURATION_PARAMETERS[key]
+                    self.param[key] = default_configuration_parameters[key]
                     self.dirty = True
         except IOError:
-            self.param = DEFAULT_CONFIGURATION_PARAMETERS
-            self.dirty = True #TODO: YAGNI?
+            self.param = default_configuration_parameters
             log.append( 'Creating configuration file: ' + self.config_file )
+            self.write(  )
         except ValueError as MalformedFileError:
             MalformedFileError.strerror = "Malformed configuration file"
             MalformedFileError.filename = self.config_file
             MalformedFileError.errno = 1
             raise MalformedFileError
-        if( self.dirty ): self.update(  );
 
 
 if __name__ == '__main__':
