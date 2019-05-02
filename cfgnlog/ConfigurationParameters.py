@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+#TODO: send error messages to a logfile
 
 APP_NAME = 'Ymir'
 

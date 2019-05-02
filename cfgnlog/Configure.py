@@ -33,7 +33,7 @@ CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'	#Except XP
 class Configure(  ):
 	def __init__( self, config_file = None ):
 		#Application is responsible for creation of DATA_DIR
-		if( config_file == None ): #TODO: Test when this is not None
+		if( config_file == None ):
 			config_file = env( CONFIGURATION_DIRECTORY_XDG )
 			if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
 			if( config_file == '' ): config_file = CONFIGURATION_DIRECTORY_XDG_DEF;
