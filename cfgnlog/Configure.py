@@ -3,6 +3,7 @@
 # Exceptions are to be handled by caller.
 
 import os, json
+from collections import OrderedDict
 from Fun import env, mkdirs, die
 import Defaults as DEFAULT
 from Defaults import APP_NAME
@@ -56,7 +57,7 @@ class Configure(  ):
     def update( self, IOErrorCallback = die ):
         try:
             fh = open( self.config_file, 'w', DEFAULT_MODE )
-            fh.write( json.dumps( self.param ) ) #TODO: Only write necessary parts
+            fh.write( json.dumps( self.param, indent=4, separators=(',', ': ') ) ) #TODO: Only write necessary parts
             fh.close(  )
             self.dirty = False
         except IOError as e: IOErrorCallback( e );
@@ -64,7 +65,7 @@ class Configure(  ):
         self.config_file = config_file
         try:
             fh = open( config_file )
-            self.param = json.loads( fh.read(  ) )
+            self.param = json.loads( fh.read(  ), object_pairs_hook=OrderedDict )
             fh.close(  )
             return False
         except IOError:
