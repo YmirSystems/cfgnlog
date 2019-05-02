@@ -41,12 +41,19 @@ class Configure(  ):
             if default_configuration_filename: config_file = os.path.join( config_file, default_configuration_filename );
             else: config_file = os.path.join( config_file, self.APP_NAME + DEFAULT_CONFIG_FILE_EXT );
         self.config_file = config_file;
+        self.actions = {}
         self.dirty = False
 
     def add_update( self, key, value ):
         if not( self.param[key] == value ):
             self.param[key] = value
             self.dirty = True
+        if key in self.actions:
+            for trigger in self.actions[key]: trigger( );
+
+    def add_action( self, key, action ):
+        if not key in self.actions: self.actions[key] = [];
+        self.actions[key].append( action )
 
     def add_dat( self ):
         ''' Add a data directory parameter to the loaded configuration. The application is responsible for creating it. '''
