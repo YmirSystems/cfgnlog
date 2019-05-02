@@ -3,20 +3,8 @@
 # Exceptions are to be handled by caller.
 
 import os, json
-from sys import exit
-
+from Fun import env, mkdirs
 from ConfigurationParameters import APP_NAME, DEFAULT_CONFIGURATION_FILENAME, DEFAULT_DATA_DIRECTORY_NAME, DATA_DIR, DEFAULT_CONFIGURATION_PARAMETERS
-
-#TODO: Move these into a separate module
-def die( e ): print( 'ERROR: ' + e.strerror ); exit( e.errno );
-def env( var ):
-	val = os.getenv( var );
-	if( val == None ): return '';
-	return val
-def mkdirs( path, mode, barf = None ):
-	if( barf != None ): print( barf + ': ' + path );
-	os.makedirs( path, mode );
-#TODO: Add mesage dilivery callback to Configuration, default to print. Use to pass to a logfile.
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
