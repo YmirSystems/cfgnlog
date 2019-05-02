@@ -6,7 +6,6 @@ class Log( ):
     def __init__( self ):
         self.logfile = None
         self.backlog = []
-        self.append( "System Startup" )
     def append( self, mesg ):
         mesg = '{:%Y-%m-%dT%H:%M:%SZ}'.format(datetime.utcnow()) + ' ' + mesg + '\n'
         print mesg
