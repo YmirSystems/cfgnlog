@@ -5,7 +5,7 @@
 import os, json
 from Fun import env, mkdirs, die
 import Defaults as DEFAULT
-from Defaults import DAT
+from Defaults import DAT, CACHE
 
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
@@ -13,13 +13,15 @@ CONFIGURATION_DIRECTORY_XDG = 'XDG_CONFIG_HOME'
 CONFIGURATION_DIRECTORY_XDG_DEF = env( 'HOME' ) + '/.config' #TODO: use os.path.join
 DATA_DIRECTORY_XDG = 'XDG_DATA_HOME'
 DATA_DIRECTORY_XDG_DEF =  env( 'HOME' ) + '/.local/share' #TODO: use os.path.join
+CACHE_DIRECTORY_XDG = 'XDG_CACHE_HOME'
+CACHE_DIRECTORY_XDG_DEF = env( 'HOME' ) + '/.cache'
 
 # Windows Compatibility #
 CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'	#Except XP
 
 class Configure(  ):
 	def __init__( self, config_file = None ):
-		#Application is responsible for creation of DAT directory
+		#Application is responsible for creation of DAT and CACHE directory
 		if( config_file == None ):
 			config_file = env( CONFIGURATION_DIRECTORY_XDG )
 			if( config_file == '' ): config_file = env( CONFIGURATION_DIRECTORY_WIN );
@@ -29,10 +31,16 @@ class Configure(  ):
 			config_file += DEFAULT.CONFIGURATION_FILENAME
 		self.dirty = self.load( config_file )
 		if( DAT not in self.param ):
-			self.param[DAT] = env( DATA_DIRECTORY_XDG );
+			self.param[DAT] = env( DATA_DIRECTORY_XDG )
 			if( self.param[DAT] == '' ): self.param[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
 			if( self.param[DAT] == '' ): self.param[DAT] = DATA_DIRECTORY_XDG_DEF;
 			self.param[DAT] += DEFAULT.DATA_DIRECTORY_NAME
+			self.dirty = True
+		if( CACHE not in self.param ):
+			self.param[CACHE] = env( CACHE_DIRECTORY_XDG )
+			if( self.param[CACHE] == '' ): self.param[CACHE] = env( CONFIGURATION_DIRECTORY_WIN )
+			if( self.param[CACHE] == '' ): self.param[CACHE] = CACHE_DIRECTORY_XDG_DEF + DEFAULT.CACHE_DIRECTORY_NAME;
+			else: self.param[CACHE] += DEFAULT.CACHE_DIRECTORY_NAME + 'cache' + os.sep#TODO: use os.path.join
 			self.dirty = True
 		for key in DEFAULT.CONFIGURATION_PARAMETERS:
 			if( key not in self.param ):
@@ -63,4 +71,4 @@ class Configure(  ):
 
 if __name__ == '__main__':
 	config = Configure(  )
-
+	print config.param
