@@ -10,9 +10,9 @@ from Defaults import DAT
 # XDG Specification Compliance # <https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 DEFAULT_MODE = 0o700
 CONFIGURATION_DIRECTORY_XDG = 'XDG_CONFIG_HOME'
-CONFIGURATION_DIRECTORY_XDG_DEF = env( 'HOME' ) + '/.config'
+CONFIGURATION_DIRECTORY_XDG_DEF = env( 'HOME' ) + '/.config' #TODO: use os.path.join
 DATA_DIRECTORY_XDG = 'XDG_DATA_HOME'
-DATA_DIRECTORY_XDG_DEF =  env( 'HOME' ) + '/.local/share'
+DATA_DIRECTORY_XDG_DEF =  env( 'HOME' ) + '/.local/share' #TODO: use os.path.join
 
 # Windows Compatibility #
 CONFIGURATION_DIRECTORY_WIN = 'LOCALAPPDATA'	#Except XP

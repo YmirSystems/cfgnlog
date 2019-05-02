@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
+import os
+
 APP_NAME = 'Ymir'
 
 VERSION = [0,0,0] #TODO: Begin incrementing once backwards compabibility is needed.
 
 CONFIGURATION_FILENAME = 'settings.cfg'
-CONFIGURATION_DIRECTORY_NAME = '/' + APP_NAME + '/'
-DATA_DIRECTORY_NAME = '/' + APP_NAME + '/Data/'
+CONFIGURATION_DIRECTORY_NAME = os.sep + APP_NAME + os.sep
+DATA_DIRECTORY_NAME = os.sep + os.path.join( APP_NAME, 'Contacts' ) + os.sep
 LOG_FILENAME = APP_NAME + '.log' #TODO
 
 DAT = 'DAT'
