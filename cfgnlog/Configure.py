@@ -55,8 +55,8 @@ class Configure(  ):
         if not( self.options[key] == value ):
             self.options[key] = value
             self.dirty = True
-        if key in self.actions:
-            for trigger in self.actions[key]: trigger( );
+            if key in self.actions:
+                for trigger in self.actions[key]: trigger( );
 
     def add_action( self, key, action ):
         if not key in self.actions: self.actions[key] = [];
