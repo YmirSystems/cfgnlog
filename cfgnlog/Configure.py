@@ -8,7 +8,6 @@ import os, json
 from collections import OrderedDict
 from Fun import mkdirs
 from Global import log
-from KeyStrings import DAT, CACHE, LOG
 
 def env( var ):
     val = os.getenv( var );
@@ -64,30 +63,30 @@ class Configure(  ):
 
     def add_dat( self ):
         ''' Add a data directory parameter to the loaded configuration. The application is responsible for creating it. '''
-        if( DAT not in self.options ):
-            self.options[DAT] = env( DATA_DIRECTORY_XDG )
-            if( self.options[DAT] == '' ): self.options[DAT] = env( CONFIGURATION_DIRECTORY_WIN );
-            if( self.options[DAT] == '' ): self.options[DAT] = DATA_DIRECTORY_XDG_DEF;
-            self.options[DAT] = os.path.join( self.options[DAT], self.APP_NAME )
+        if( 'DAT' not in self.options ):
+            self.options['DAT'] = env( DATA_DIRECTORY_XDG )
+            if( self.options['DAT'] == '' ): self.options['DAT'] = env( CONFIGURATION_DIRECTORY_WIN );
+            if( self.options['DAT'] == '' ): self.options['DAT'] = DATA_DIRECTORY_XDG_DEF;
+            self.options['DAT'] = os.path.join( self.options['DAT'], self.APP_NAME )
             self.dirty = True
 
     def add_log( self, default_log_filename = None, default_use_home = False ):
         ''' Add a log directory parameter to the loaded configuration. The application is responsible for creating it. '''
-        if( LOG not in self.options ):
-            if default_log_filename: self.options[LOG] = default_log_filename;
-            else: self.options[LOG] = self.APP_NAME + ".log";
+        if( 'LOG' not in self.options ):
+            if default_log_filename: self.options['LOG'] = default_log_filename;
+            else: self.options['LOG'] = self.APP_NAME + ".log";
             if default_use_home:
-                self.options[LOG] = os.path.join( ENV_HOME, '.'+self.options[LOG] );
-            else: self.options[LOG] = os.path.join( self.options[DAT], self.options[LOG] );
+                self.options['LOG'] = os.path.join( ENV_HOME, '.'+self.options['LOG'] );
+            else: self.options['LOG'] = os.path.join( self.options['DAT'], self.options['LOG'] );
             self.dirty = True
 
     def add_cache( self ):
         ''' Add a cache directory parameter to the loaded configuration. The application is responsible for creating it. '''
-        if( CACHE not in self.options ):
-            self.options[CACHE] = env( CACHE_DIRECTORY_XDG )
-            if( self.options[CACHE] == '' ): self.options[CACHE] = env( CONFIGURATION_DIRECTORY_WIN );
-            if( self.options[CACHE] == '' ): self.options[CACHE] = os.path.join( CACHE_DIRECTORY_XDG_DEF, self.APP_NAME );
-            else: self.options[CACHE] = os.path.join( self.options[CACHE], self.APP_NAME, 'cache' ); #WINDOWS
+        if( 'CACHE' not in self.options ):
+            self.options['CACHE'] = env( CACHE_DIRECTORY_XDG )
+            if( self.options['CACHE'] == '' ): self.options['CACHE'] = env( CONFIGURATION_DIRECTORY_WIN );
+            if( self.options['CACHE'] == '' ): self.options['CACHE'] = os.path.join( CACHE_DIRECTORY_XDG_DEF, self.APP_NAME );
+            else: self.options['CACHE'] = os.path.join( self.options['CACHE'], self.APP_NAME, 'cache' ); #WINDOWS
             self.dirty = True
 
     def write( self ):
