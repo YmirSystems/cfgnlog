@@ -15,7 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Inteded Audience :: Developers",
+        "Intended Audience :: Developers",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: Artistic License",
         "Programming Language :: Python :: 2.7",
