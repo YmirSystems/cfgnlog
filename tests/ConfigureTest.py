@@ -9,4 +9,4 @@ if __name__ == '__main__':
     config.add_dat(  )
     config.add_cache(  )
     config.add_log( default_use_home = True )
-    print config.options
+    print( config.options )

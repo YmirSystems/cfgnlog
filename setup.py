@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cfgnlog-YmirSystems",
-    version="0.0.1",
+    version="0.0.2",
     author="Ymir Systems",
     author_email="info@YmirSystems.com",
     description="Simple configuration and log files. Config files use JSON. XDG compliant by default.",
@@ -19,5 +19,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: Artistic License",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3"
     ],
 )
